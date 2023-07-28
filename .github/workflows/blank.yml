@@ -18,6 +18,20 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
 
+      - name: Download Aliyunpan
+        run: |
+          mkdir bin
+          cd bin
+          wget https://github.com/tickstep/aliyunpan/releases/download/v0.2.7/aliyunpan-v0.2.7-linux-amd64.zip
+          unzip aliyunpan*.zip
+          mv aliyunpan*/aliyunpan* ./aliyunpan
+
+      - name: Login aliyundrive
+        run: |
+          ./bin/aliyunpan login -RefreshToken=$REFRESHTOKEN 
+        env: 
+          REFRESHTOKEN: ${{secrets.RefreshToken}}
+
       # Runs a set of commands using the runners shell
       - name: Download whisper model
         run: |
@@ -31,19 +45,8 @@ jobs:
           wget "https://openaipublic.azureedge.net/main/whisper/models/345ae4da62f9b3d59415adc60127b97c714f32e89e936602e85993674d08dcb1/medium.pt"
           wget "https://openaipublic.azureedge.net/main/whisper/models/e4b87e7e0bf463eb8e6956e646f1e277e901512310def2c24bf0e11bd3c28e9a/large-v1.pt"
           wget "https://openaipublic.azureedge.net/main/whisper/models/81f7c96c852ee8fc832187b0132e569d6c3065a3252ed18e56effd0b6a73e524/large-v2.pt"
-
-      - name: Download Aliyunpan
-        run: |
-          mkdir bin
-          cd bin
-          wget https://github.com/tickstep/aliyunpan/releases/download/v0.2.7/aliyunpan-v0.2.7-linux-amd64.zip
-          unzip aliyunpan*.zip
-          mv aliyunpan*/aliyunpan* ./aliyunpan
       
       - name: Upload to aliyundrive
         run: |
-          ./bin/aliyunpan login -RefreshToken=$REFRESHTOKEN 
           ls ./*.pt | xargs -i ./bin/aliyunpan upload {} /inbox-github/model
-        env: 
-          REFRESHTOKEN: ${{secrets.RefreshToken}}
           
